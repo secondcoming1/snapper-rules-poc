@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions
+    xmlns="https://www.omg.org/spec/DMN/20230324/MODEL/"
+    xmlns:dmndi="https://www.omg.org/spec/DMN/20230324/DMNDI/"
+    xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/"
+    xmlns:di="http://www.omg.org/spec/DMN/20180521/DI/"
+    xmlns:feel="https://www.omg.org/spec/DMN/20180521/FEEL/"
+    id="income-source-classification"
+    name="Income Source Classification"
+    namespace="https://dss.nyc.gov/snapper/rules/income/v1">
+
+    <inputData id="input-source-type" name="Source Type">
+        <variable
+            id="variable-source-type"
+            name="Source Type"
+            typeRef="string"/>
+    </inputData>touch 
+
+    <decision id="decision-income-category" name="Income Category">
+        <variable
+            id="variable-income-category"
+            name="Income Category"
+            typeRef="string"/>
+
+        <informationRequirement>
+            <requiredInput href="#input-source-type"/>
+        </informationRequirement>
+
+        <decisionTable
+            id="decision-table-income-category"
+            hitPolicy="FIRST">
+
+            <input id="input-clause-source-type">
+                <inputExpression
+                    id="input-expression-source-type"
+                    typeRef="string">
+                    <text>Source Type</text>
+                </inputExpression>
+            </input>
+
+            <output
+                id="output-clause-income-category"
+                name="Income Category"
+                typeRef="string"/>
+
+            <rule id="rule-employer-wages">
+                <inputEntry id="input-employer-wages">
+                    <text>"EMPLOYER_WAGES"</text>
+                </inputEntry>
+                <outputEntry id="output-employer-wages">
+                    <text>"EARNED"</text>
+                </outputEntry>
+            </rule>
+
+            <rule id="rule-self-employment">
+                <inputEntry id="input-self-employment">
+                    <text>"SELF_EMPLOYMENT"</text>
+                </inputEntry>
+                <outputEntry id="output-self-employment">
+                    <text>"EARNED"</text>
+                </outputEntry>
+            </rule>
+
+            <rule id="rule-social-security">
+                <inputEntry id="input-social-security">
+                    <text>"SOCIAL_SECURITY"</text>
+                </inputEntry>
+                <outputEntry id="output-social-security">
+                    <text>"UNEARNED"</text>
+                </outputEntry>
+            </rule>
+
+            <rule id="rule-pension">
+                <inputEntry id="input-pension">
+                    <text>"PENSION"</text>
+                </inputEntry>
+                <outputEntry id="output-pension">
+                    <text>"UNEARNED"</text>
+                </outputEntry>
+            </rule>
+
+            <rule id="rule-default">
+                <inputEntry id="input-default">
+                    <text>-</text>
+                </inputEntry>
+                <outputEntry id="output-default">
+                    <text>"UNCLASSIFIED"</text>
+                </outputEntry>
+            </rule>
+        </decisionTable>
+    </decision>
+</definitions>

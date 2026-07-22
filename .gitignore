@@ -1,0 +1,39 @@
+# Java / Maven
+target/
+*.class
+*.jar
+*.war
+*.ear
+
+# Maven wrapper downloads
+.mvn/wrapper/maven-wrapper.jar
+
+# IDE
+.vscode/
+.idea/
+*.iml
+.project
+.classpath
+.settings/
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
+startup-error.log
+
+# Environment and secrets
+.env
+.env.*
+*.pem
+*.key
+application-local.properties
+application-local.yml
+
+# Python, for the later FastAPI service
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
