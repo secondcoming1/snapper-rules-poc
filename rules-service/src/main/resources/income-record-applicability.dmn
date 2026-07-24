@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions
+    xmlns="https://www.omg.org/spec/DMN/20230324/MODEL/"
+    xmlns:feel="https://www.omg.org/spec/DMN/20180521/FEEL/"
+    id="income-record-applicability"
+    name="Income Record Applicability"
+    namespace="https://dss.nyc.gov/snapper/rules/income-applicability/v1">
+
+    <inputData id="input-benefit-start" name="Benefit Month Start">
+        <variable
+            id="variable-benefit-start"
+            name="Benefit Month Start"
+            typeRef="date"/>
+    </inputData>
+
+    <inputData id="input-benefit-end" name="Benefit Month End">
+        <variable
+            id="variable-benefit-end"
+            name="Benefit Month End"
+            typeRef="date"/>
+    </inputData>
+
+    <inputData id="input-effective-from" name="Effective From">
+        <variable
+            id="variable-effective-from"
+            name="Effective From"
+            typeRef="date"/>
+    </inputData>
+
+    <inputData id="input-effective-to" name="Effective To">
+        <variable
+            id="variable-effective-to"
+            name="Effective To"
+            typeRef="date"/>
+    </inputData>
+
+    <inputData id="input-verified" name="Verified">
+        <variable
+            id="variable-verified"
+            name="Verified"
+            typeRef="boolean"/>
+    </inputData>
+
+    <inputData id="input-document-type" name="Document Type">
+        <variable
+            id="variable-document-type"
+            name="Document Type"
+            typeRef="string"/>
+    </inputData>
+
+    <decision
+        id="decision-applicability"
+        name="Applicability Classification">
+
+        <variable
+            id="variable-applicability"
+            name="Applicability Classification"
+            typeRef="string"/>
+
+        <informationRequirement>
+            <requiredInput href="#input-benefit-start"/>
+        </informationRequirement>
+
+        <informationRequirement>
+            <requiredInput href="#input-benefit-end"/>
+        </informationRequirement>
+
+        <informationRequirement>
+            <requiredInput href="#input-effective-from"/>
+        </informationRequirement>
+
+        <informationRequirement>
+            <requiredInput href="#input-effective-to"/>
+        </informationRequirement>
+
+        <informationRequirement>
+            <requiredInput href="#input-verified"/>
+        </informationRequirement>
+
+        <informationRequirement>
+            <requiredInput href="#input-document-type"/>
+        </informationRequirement>
+
+        <decisionTable
+            id="decision-table-applicability"
+            hitPolicy="FIRST">
+
+            <input id="clause-effective-from">
+                <inputExpression
+                    id="expression-effective-from"
+                    typeRef="date">
+                    <text>Effective From</text>
+                </inputExpression>
+            </input>
+
+            <input id="clause-effective-to">
+                <inputExpression
+                    id="expression-effective-to"
+                    typeRef="date">
+                    <text>Effective To</text>
+                </inputExpression>
+            </input>
+
+            <input id="clause-verified">
+                <inputExpression
+                    id="expression-verified"
+                    typeRef="boolean">
+                    <text>Verified</text>
+                </inputExpression>
+            </input>
+
+            <input id="clause-document-type">
+                <inputExpression
+                    id="expression-document-type"
+                    typeRef="string">
+                    <text>Document Type</text>
+                </inputExpression>
+            </input>
+
+            <output
+                id="output-classification"
+                name="classification"
+                typeRef="string"/>
+
+            <output
+                id="output-reason-code"
+                name="reasonCode"
+                typeRef="string"/>
+
+            <!-- Missing effective start date -->
+            <rule id="rule-missing-start-date">
+                <inputEntry id="missing-start-from">
+                    <text>null</text>
+                </inputEntry>
+                <inputEntry id="missing-start-to">
+                    <text>-</text>
+                </inputEntry>
+                <inputEntry id="missing-start-verified">
+                    <text>-</text>
+                </inputEntry>
+                <inputEntry id="missing-start-document">
+                    <text>-</text>
+                </inputEntry>
+                <outputEntry id="missing-start-classification">
+                    <text>"INSUFFICIENT_DATE_INFORMATION"</text>
+                </outputEntry>
+                <outputEntry id="missing-start-reason">
+                    <text>"EFFECTIVE_FROM_MISSING"</text>
+                </outputEntry>
+            </rule>
+
+            <!-- Starts after the benefit month -->
+            <rule id="rule-future-dated">
+                <inputEntry id="future-from">
+                    <text>&gt; Benefit Month End</text>
+                </inputEntry>
+                <inputEntry id="future-to">
+                    <text>-</text>
+                </inputEntry>
+                <inputEntry id="future-verified">
+                    <text>-</text>
+                </inputEntry>
+                <inputEntry id="future-document">
+                    <text>-</text>
+                </inputEntry>
+                <outputEntry id="future-classification">
+                    <text>"FUTURE_DATED_INCOME"</text>
+                </outputEntry>
+                <outputEntry id="future-reason">
+                    <text>"EFFECTIVE_AFTER_BENEFIT_MONTH"</text>
+                </outputEntry>
+            </rule>
+
+            <!-- Ended before the benefit month -->
+            <rule id="rule-expired">
+                <inputEntry id="expired-from">
+                    <text>-</text>
+                </inputEntry>
+                <inputEntry id="expired-to">
+                    <text>&lt; Benefit Month Start</text>
+                </inputEntry>
+                <inputEntry id="expired-verified">
+                    <text>-</text>
+                </inputEntry>
+                <inputEntry id="expired-document">
+                    <text>-</text>
+                </inputEntry>
+                <outputEntry id="expired-classification">
+                    <text>"EXPIRED_INCOME"</text>
+                </outputEntry>
+                <outputEntry id="expired-reason">
+                    <text>"EFFECTIVE_PERIOD_ENDED_BEFORE_BENEFIT_MONTH"</text>
+                </outputEntry>
+            </rule>
+
+            <!-- Current but not verified -->
+            <rule id="rule-current-unverified">
+                <inputEntry id="unverified-from">
+                    <text>&lt;= Benefit Month End</text>
+                </inputEntry>
+                <inputEntry id="unverified-to">
+                    <text>-</text>
+                </inputEntry>
+                <inputEntry id="unverified-verified">
+                    <text>false</text>
+                </inputEntry>
+                <inputEntry id="unverified-document">
+                    <text>-</text>
+                </inputEntry>
+                <outputEntry id="unverified-classification">
+                    <text>"CURRENT_UNVERIFIED_INCOME"</text>
+                </outputEntry>
+                <outputEntry id="unverified-reason">
+                    <text>"CURRENT_RECORD_NOT_VERIFIED"</text>
+                </outputEntry>
+            </rule>
+
+            <!-- Current and verified -->
+            <rule id="rule-current-verified">
+                <inputEntry id="current-from">
+                    <text>&lt;= Benefit Month End</text>
+                </inputEntry>
+                <inputEntry id="current-to">
+                    <text>-</text>
+                </inputEntry>
+                <inputEntry id="current-verified">
+                    <text>true</text>
+                </inputEntry>
+                <inputEntry id="current-document">
+                    <text>-</text>
+                </inputEntry>
+                <outputEntry id="current-classification">
+                    <text>"CURRENT_VERIFIED_INCOME"</text>
+                </outputEntry>
+                <outputEntry id="current-reason">
+                    <text>"RECORD_APPLICABLE_TO_BENEFIT_MONTH"</text>
+                </outputEntry>
+            </rule>
+        </decisionTable>
+    </decision>
+</definitions>
